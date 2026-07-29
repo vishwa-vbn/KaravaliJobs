@@ -51,7 +51,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .where('status', '==', 'active')
       .get();
 
-    const jobRoutes: MetadataRoute.Sitemap = snapshot.docs.map((doc) => {
+    const jobRoutes: MetadataRoute.Sitemap = snapshot.docs.map((doc: any) => {
       const data = doc.data();
       return {
         url: `${BASE_URL}/jobs/${doc.id}`,

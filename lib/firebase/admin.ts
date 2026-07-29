@@ -8,20 +8,21 @@
 //   FIREBASE_ADMIN_PRIVATE_KEY     — from the downloaded JSON (contains literal \n)
 //
 // See SETUP.md §4 and ARCHITECTURE.md §8.
-import * as admin from 'firebase-admin';
-import { FieldValue } from 'firebase-admin/firestore';
+import { initializeApp, getApps, cert, getApp } from 'firebase-admin/app';
+import { getFirestore, FieldValue } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
 
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
-      // Vercel stores the private key with literal \n — replace at runtime
-      privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    }),
-  });
-}
+const app = getApps().length === 0 
+  ? initializeApp({
+      credential: cert({
+        projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
+        // Vercel stores the private key with literal \n — replace at runtime
+        privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+      }),
+    })
+  : getApp();
 
-export const adminDb = admin.firestore();
-export const adminAuth = admin.auth();
-export { admin, FieldValue };
+export const adminDb = getFirestore(app);
+export const adminAuth = getAuth(app);
+export { FieldValue };

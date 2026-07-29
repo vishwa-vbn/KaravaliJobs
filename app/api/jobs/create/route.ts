@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { adminDb, adminAuth } from '@/lib/firebase/admin';
 import { sendNewJobAlert, sendAdminFlaggedNotice } from '@/lib/server/brevo';
 import { sendTelegramJobPost } from '@/lib/server/telegram';
-import { admin, FieldValue } from '@/lib/firebase/admin';
+import { FieldValue } from '@/lib/firebase/admin';
 import { containsProfanity } from '@/lib/server/moderation';
 
 /**
