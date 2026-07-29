@@ -11,7 +11,7 @@ export default function TelegramWidget() {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
 
-  const telegramUrl = process.env.NEXT_PUBLIC_TELEGRAM_CHANNEL_URL || 'https://t.me/UdupiMangaloreJobs';
+  const telegramUrl = process.env.NEXT_PUBLIC_TELEGRAM_CHANNEL_URL || 'https://t.me/karavali_jobs_channel';
 
   const handleJoin = async () => {
     // Open Telegram channel in a new tab
