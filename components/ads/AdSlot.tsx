@@ -14,9 +14,9 @@ function cleanKey(val: string): string {
 
 function cleanDomain(val: string): string {
   if (!val) return '';
-  const match = val.match(/src=["']https?:\/\/([^/]+)/i);
+  const match = val.match(/src=\\?["']?https?:\/\/([^/="'\s>\\]+)/i);
   if (match) return match[1];
-  const urlMatch = val.match(/https?:\/\/([^/]+)/i);
+  const urlMatch = val.match(/https?:\/\/([^/="'\s>\\]+)/i);
   if (urlMatch) return urlMatch[1];
   return val.trim();
 }
