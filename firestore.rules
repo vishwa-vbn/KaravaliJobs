@@ -1,0 +1,86 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions for auth verification
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isUserDoc(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isSuperAdmin() {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'super_admin';
+    }
+
+    function isProviderOrAdmin() {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'provider' || 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'super_admin');
+    }
+
+    // Default deny on all documents
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // ─── jobs rules ──────────────────────────────────────────────────────────
+    match /jobs/{jobId} {
+      // Anyone can read active listings (or admin can read pending/rejected ones)
+      allow read: if resource.data.status == 'active' || isSuperAdmin() || (isAuthenticated() && resource.data.providerId == request.auth.uid);
+
+      // Only onboarded providers or admins can create listings
+      allow create: if isProviderOrAdmin()
+                    && request.resource.data.providerId == request.auth.uid
+                    && request.resource.data.status == 'pending_review'
+                    && request.resource.data.featured == false;
+
+      // Only the owning provider or super admin can update or delete
+      allow update, delete: if isSuperAdmin()
+                             || (isAuthenticated() && resource.data.providerId == request.auth.uid);
+    }
+
+    // ─── users rules ─────────────────────────────────────────────────────────
+    match /users/{uid} {
+      allow read: if isUserDoc(uid) || isSuperAdmin();
+
+      // Create initial Seeker profile on first registration, or allow Super Admin to create
+      allow create: if isSuperAdmin() || (
+                      isUserDoc(uid)
+                      && request.resource.data.role == 'seeker'
+                      && request.resource.data.onboarded == false
+                      && request.resource.data.phone == null
+                    );
+
+      // Update rules:
+      // - Super Admin can change anything (promote, demote, suspend)
+      // - Standard users can only update their own profile and cannot self-promote to admin
+      allow update: if isSuperAdmin() || (
+                      isUserDoc(uid)
+                      && (
+                        (request.resource.data.role == resource.data.role) ||
+                        (resource.data.role == 'seeker' && request.resource.data.role == 'provider' && request.resource.data.onboarded == true)
+                      )
+                      && request.resource.data.role != 'super_admin'
+                    );
+
+      // Super Admin can delete users
+      allow delete: if isSuperAdmin();
+    }
+    // ─── channelsQueue rules ─────────────────────────────────────────────────
+    match /channelsQueue/{docId} {
+      allow read, write: if isSuperAdmin();
+    }
+  }
+}
+
+

@@ -1,0 +1,9 @@
+User-Agent: *
+Allow: /
+
+# Exclude admin and dashboard paths from being indexed
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /seeker/profile/
+
+Sitemap: https://karavali-jobs.com/sitemap.xml

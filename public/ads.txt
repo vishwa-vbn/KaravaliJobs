@@ -1,0 +1,11 @@
+# ads.txt for Karavali Jobs
+# Add valid publisher IDs here before activating ad campaigns.
+
+# Adsterra placeholder
+adsterra.com, pub-0000000000000000, DIRECT, 0000000000000000
+
+# Google AdSense placeholder
+google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+
+# Media.net placeholder
+media.net, pub-0000000000000000, DIRECT, 0000000000000000

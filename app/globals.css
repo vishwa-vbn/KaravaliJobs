@@ -1,0 +1,968 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =====================================================================
+   DESIGN SYSTEM — KARAVALI JOBS
+   Color-coded for clarity: categories, statuses, containers, tags
+   ===================================================================== */
+
+:root {
+  /* Base */
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --muted: #64748b;
+  --muted-light: #94a3b8;
+  --border: #e2e8f0;
+  --border-light: #f1f5f9;
+  --surface: #f8fafc;
+  --surface-hover: #f1f5f9;
+
+  /* Brand accent — Indigo */
+  --brand: #4f46e5;
+  --brand-light: #ede9fe;
+  --brand-dark: #3730a3;
+  --brand-border: #c4b5fd;
+
+  /* ── Job Type Color Tokens ───────────────────────────── */
+  /* Full-time / Permanent — Deep Blue */
+  --type-permanent-bg: #eff6ff;
+  --type-permanent-text: #1d4ed8;
+  --type-permanent-border: #bfdbfe;
+
+  /* Part-time — Violet */
+  --type-parttime-bg: #f5f3ff;
+  --type-parttime-text: #7c3aed;
+  --type-parttime-border: #ddd6fe;
+
+  /* Remote — Teal */
+  --type-remote-bg: #f0fdfa;
+  --type-remote-text: #0f766e;
+  --type-remote-border: #99f6e4;
+
+  /* Contract — Amber */
+  --type-contract-bg: #fffbeb;
+  --type-contract-text: #b45309;
+  --type-contract-border: #fde68a;
+
+  /* ── Category Color Tokens ───────────────────────────── */
+  /* IT & Software — Blue */
+  --cat-it-bg: #eff6ff;
+  --cat-it-text: #1e40af;
+  --cat-it-border: #bfdbfe;
+
+  /* Sales & Marketing — Rose */
+  --cat-sales-bg: #fff1f2;
+  --cat-sales-text: #be123c;
+  --cat-sales-border: #fecdd3;
+
+  /* Finance & Accounts — Emerald */
+  --cat-finance-bg: #ecfdf5;
+  --cat-finance-text: #065f46;
+  --cat-finance-border: #a7f3d0;
+
+  /* Healthcare — Red/Pink */
+  --cat-health-bg: #fef2f2;
+  --cat-health-text: #991b1b;
+  --cat-health-border: #fecaca;
+
+  /* Office Admin — Slate */
+  --cat-admin-bg: #f8fafc;
+  --cat-admin-text: #334155;
+  --cat-admin-border: #cbd5e1;
+
+  /* Hospitality — Orange */
+  --cat-hospitality-bg: #fff7ed;
+  --cat-hospitality-text: #c2410c;
+  --cat-hospitality-border: #fed7aa;
+
+  /* Retail — Purple */
+  --cat-retail-bg: #faf5ff;
+  --cat-retail-text: #6b21a8;
+  --cat-retail-border: #e9d5ff;
+
+  /* Education — Indigo */
+  --cat-education-bg: #eef2ff;
+  --cat-education-text: #3730a3;
+  --cat-education-border: #c7d2fe;
+
+  /* Other — Gray */
+  --cat-other-bg: #f9fafb;
+  --cat-other-text: #374151;
+  --cat-other-border: #d1d5db;
+
+  /* ── Status Tokens ───────────────────────────────────── */
+  --status-active-bg: #ecfdf5;
+  --status-active-text: #065f46;
+  --status-active-border: #a7f3d0;
+  --status-active-dot: #10b981;
+
+  --status-pending-bg: #fffbeb;
+  --status-pending-text: #92400e;
+  --status-pending-border: #fde68a;
+  --status-pending-dot: #f59e0b;
+
+  --status-expired-bg: #fef2f2;
+  --status-expired-text: #991b1b;
+  --status-expired-border: #fecaca;
+  --status-expired-dot: #ef4444;
+
+  --status-new-bg: #ecfdf5;
+  --status-new-text: #065f46;
+  --status-new-border: #a7f3d0;
+
+  /* ── Container / Panel Tokens ────────────────────────── */
+  --panel-cta-bg: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  --panel-alert-bg: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
+  --panel-warning-bg: #fffbeb;
+  --panel-warning-border: #fde68a;
+  --panel-info-bg: #eff6ff;
+  --panel-info-border: #bfdbfe;
+
+  /* ── Stat Card Tokens ────────────────────────────────── */
+  --stat-users-accent: #4f46e5;
+  --stat-users-bg: #eef2ff;
+  --stat-jobs-accent: #059669;
+  --stat-jobs-bg: #ecfdf5;
+  --stat-pending-accent: #d97706;
+  --stat-pending-bg: #fffbeb;
+  --stat-error-accent: #dc2626;
+  --stat-error-bg: #fef2f2;
+}
+
+/* Force white theme — never dark mode */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #ffffff;
+    --foreground: #0f172a;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Global input & form element resets */
+input,
+select,
+textarea,
+option {
+  color: var(--foreground) !important;
+  background-color: #ffffff !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Focus ring — brand colored */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--brand) !important;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.08) !important;
+}
+
+/* Remove default browser autofill yellow */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+  -webkit-text-fill-color: var(--foreground) !important;
+}
+
+/* Scrollbar — subtle */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* =====================================================================
+   TYPOGRAPHY SCALE
+   ===================================================================== */
+
+.text-display {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: var(--foreground);
+}
+
+.text-heading {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  color: var(--foreground);
+}
+
+.text-subheading {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--foreground);
+}
+
+.text-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+}
+
+.text-body {
+  font-size: 0.8125rem;
+  color: #475569;
+  line-height: 1.65;
+}
+
+.text-meta {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+/* =====================================================================
+   BUTTONS
+   ===================================================================== */
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1.125rem;
+  background: var(--brand);
+  color: #ffffff;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid var(--brand);
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(79, 70, 229, 0.3);
+}
+.btn-primary:hover {
+  background: var(--brand-dark);
+  border-color: var(--brand-dark);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
+}
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1.125rem;
+  background: #ffffff;
+  color: #334155;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn-secondary:hover {
+  background: var(--surface-hover);
+  border-color: #94a3b8;
+  color: var(--foreground);
+}
+
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.5rem 1.125rem;
+  background: #fef2f2;
+  color: #dc2626;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn-danger:hover {
+  background: #fee2e2;
+}
+
+/* =====================================================================
+   TAGS / BADGES — base style
+   Semantic variants below
+   ===================================================================== */
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.1875rem 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  color: #475569;
+  background: var(--surface);
+  white-space: nowrap;
+}
+
+/* ─── Job Type Tags ──────────────────────────────────────── */
+.tag-type-permanent {
+  background: var(--type-permanent-bg);
+  color: var(--type-permanent-text);
+  border-color: var(--type-permanent-border);
+}
+.tag-type-parttime {
+  background: var(--type-parttime-bg);
+  color: var(--type-parttime-text);
+  border-color: var(--type-parttime-border);
+}
+.tag-type-remote {
+  background: var(--type-remote-bg);
+  color: var(--type-remote-text);
+  border-color: var(--type-remote-border);
+}
+.tag-type-contract {
+  background: var(--type-contract-bg);
+  color: var(--type-contract-text);
+  border-color: var(--type-contract-border);
+}
+
+/* ─── Category Tags ──────────────────────────────────────── */
+.tag-cat-it {
+  background: var(--cat-it-bg);
+  color: var(--cat-it-text);
+  border-color: var(--cat-it-border);
+}
+.tag-cat-sales {
+  background: var(--cat-sales-bg);
+  color: var(--cat-sales-text);
+  border-color: var(--cat-sales-border);
+}
+.tag-cat-finance {
+  background: var(--cat-finance-bg);
+  color: var(--cat-finance-text);
+  border-color: var(--cat-finance-border);
+}
+.tag-cat-health {
+  background: var(--cat-health-bg);
+  color: var(--cat-health-text);
+  border-color: var(--cat-health-border);
+}
+.tag-cat-admin {
+  background: var(--cat-admin-bg);
+  color: var(--cat-admin-text);
+  border-color: var(--cat-admin-border);
+}
+.tag-cat-hospitality {
+  background: var(--cat-hospitality-bg);
+  color: var(--cat-hospitality-text);
+  border-color: var(--cat-hospitality-border);
+}
+.tag-cat-retail {
+  background: var(--cat-retail-bg);
+  color: var(--cat-retail-text);
+  border-color: var(--cat-retail-border);
+}
+.tag-cat-education {
+  background: var(--cat-education-bg);
+  color: var(--cat-education-text);
+  border-color: var(--cat-education-border);
+}
+.tag-cat-other {
+  background: var(--cat-other-bg);
+  color: var(--cat-other-text);
+  border-color: var(--cat-other-border);
+}
+
+/* ─── Status Badges ──────────────────────────────────────── */
+.badge-active {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3125rem;
+  padding: 0.1875rem 0.5625rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-radius: 20px;
+  background: var(--status-active-bg);
+  color: var(--status-active-text);
+  border: 1px solid var(--status-active-border);
+}
+.badge-active::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--status-active-dot);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.badge-new {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-radius: 4px;
+  background: var(--status-new-bg);
+  color: var(--status-new-text);
+  border: 1px solid var(--status-new-border);
+}
+
+.badge-pending {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3125rem;
+  padding: 0.1875rem 0.5625rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-radius: 20px;
+  background: var(--status-pending-bg);
+  color: var(--status-pending-text);
+  border: 1px solid var(--status-pending-border);
+}
+.badge-pending::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--status-pending-dot);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.badge-expired {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3125rem;
+  padding: 0.1875rem 0.5625rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-radius: 20px;
+  background: var(--status-expired-bg);
+  color: var(--status-expired-text);
+  border: 1px solid var(--status-expired-border);
+}
+.badge-expired::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--status-expired-dot);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* ─── Role Badges ─────────────────────────────────────────── */
+.badge-role-seeker {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  border-radius: 4px;
+  background: var(--brand-light);
+  color: var(--brand);
+  border: 1px solid var(--brand-border);
+}
+.badge-role-provider {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  border-radius: 4px;
+  background: var(--cat-finance-bg);
+  color: var(--cat-finance-text);
+  border: 1px solid var(--cat-finance-border);
+}
+.badge-role-admin {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  border-radius: 4px;
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+/* =====================================================================
+   FORM FIELD
+   ===================================================================== */
+
+.field-input {
+  width: 100%;
+  padding: 0.5625rem 0.875rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  color: var(--foreground);
+  background: #ffffff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.field-input:focus {
+  border-color: var(--brand);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.08);
+}
+
+/* =====================================================================
+   DIVIDER
+   ===================================================================== */
+
+.divider {
+  height: 1px;
+  background: var(--border-light);
+  margin: 0;
+}
+
+/* =====================================================================
+   SECTION CONTAINER
+   ===================================================================== */
+
+.section-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* =====================================================================
+   STAT / METRIC CARDS
+   ===================================================================== */
+
+.stat-card {
+  padding: 1.25rem 1.5rem;
+  border-right: 1px solid var(--border);
+  position: relative;
+  transition: background 0.15s ease;
+}
+.stat-card:last-child {
+  border-right: none;
+}
+.stat-card-value {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 0.25rem;
+}
+.stat-card-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  margin-bottom: 0.375rem;
+}
+.stat-card-sub {
+  font-size: 0.6875rem;
+  color: var(--muted-light);
+}
+
+.stat-users .stat-card-value { color: var(--stat-users-accent); }
+.stat-jobs .stat-card-value { color: var(--stat-jobs-accent); }
+.stat-pending .stat-card-value { color: var(--stat-pending-accent); }
+.stat-error .stat-card-value { color: var(--stat-error-accent); }
+
+/* =====================================================================
+   PANEL CONTAINERS
+   ===================================================================== */
+
+/* Hiring CTA panel */
+.panel-cta {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  border-radius: 12px;
+  padding: 1.25rem;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+.panel-cta::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  pointer-events: none;
+}
+
+/* Job Alerts panel */
+.panel-alerts {
+  background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%);
+  border: 1px solid var(--status-active-border);
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+/* Sponsored / Ad panel */
+.panel-sponsored {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+/* Sidebar info card */
+.panel-info {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+/* Share panel */
+.panel-share {
+  background: var(--panel-info-bg);
+  border: 1px solid var(--panel-info-border);
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+/* How to apply panel */
+.panel-apply {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+/* =====================================================================
+   KEY DETAILS GRID (job detail page)
+   ===================================================================== */
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+@media (min-width: 640px) {
+  .details-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+.details-grid-item {
+  padding: 1rem 1.125rem;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.details-grid-item:last-child,
+.details-grid-item:nth-child(2),
+.details-grid-item:nth-child(4) {
+  border-right: none;
+}
+@media (min-width: 640px) {
+  .details-grid-item:nth-child(2) {
+    border-right: 1px solid var(--border);
+  }
+  .details-grid-item:nth-child(4) {
+    border-right: none;
+  }
+  .details-grid-item {
+    border-bottom: none;
+  }
+}
+.details-grid-item-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  margin-bottom: 0.375rem;
+}
+.details-grid-item-value {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+/* Salary item accent */
+.details-grid-item.salary-item {
+  background: var(--cat-finance-bg);
+}
+.details-grid-item.salary-item .details-grid-item-value {
+  color: var(--cat-finance-text);
+}
+
+/* Deadline item accent */
+.details-grid-item.deadline-item {
+  background: #fffbeb;
+}
+.details-grid-item.deadline-item .details-grid-item-value {
+  color: #b45309;
+}
+
+/* =====================================================================
+   CATEGORY FILTER BUTTON — active states
+   ===================================================================== */
+
+.cat-btn {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 0.3125rem 0.625rem;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.cat-btn-inactive {
+  color: #64748b;
+  background: transparent;
+  border-color: transparent;
+}
+.cat-btn-inactive:hover {
+  background: var(--surface-hover);
+  color: var(--foreground);
+  border-color: var(--border);
+}
+
+/* Category-specific active button colors */
+.cat-btn-active-all {
+  background: var(--foreground);
+  color: #ffffff;
+  border-color: var(--foreground);
+}
+.cat-btn-active-it {
+  background: var(--cat-it-bg);
+  color: var(--cat-it-text);
+  border-color: var(--cat-it-border);
+}
+.cat-btn-active-sales {
+  background: var(--cat-sales-bg);
+  color: var(--cat-sales-text);
+  border-color: var(--cat-sales-border);
+}
+.cat-btn-active-finance {
+  background: var(--cat-finance-bg);
+  color: var(--cat-finance-text);
+  border-color: var(--cat-finance-border);
+}
+.cat-btn-active-health {
+  background: var(--cat-health-bg);
+  color: var(--cat-health-text);
+  border-color: var(--cat-health-border);
+}
+.cat-btn-active-admin {
+  background: var(--cat-admin-bg);
+  color: var(--cat-admin-text);
+  border-color: var(--cat-admin-border);
+}
+.cat-btn-active-hospitality {
+  background: var(--cat-hospitality-bg);
+  color: var(--cat-hospitality-text);
+  border-color: var(--cat-hospitality-border);
+}
+.cat-btn-active-retail {
+  background: var(--cat-retail-bg);
+  color: var(--cat-retail-text);
+  border-color: var(--cat-retail-border);
+}
+.cat-btn-active-education {
+  background: var(--cat-education-bg);
+  color: var(--cat-education-text);
+  border-color: var(--cat-education-border);
+}
+.cat-btn-active-other {
+  background: var(--cat-other-bg);
+  color: var(--cat-other-text);
+  border-color: var(--cat-other-border);
+}
+
+/* =====================================================================
+   ADMIN MODULE CARDS
+   ===================================================================== */
+
+.admin-module-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  background: #ffffff;
+}
+.admin-module-card:hover {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.08);
+  background: #fafbff;
+}
+.admin-module-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* =====================================================================
+   NOTIFICATION / ALERT BANNERS
+   ===================================================================== */
+
+.alert-success {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--status-active-border);
+  border-radius: 10px;
+  background: var(--status-active-bg);
+  color: var(--status-active-text);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.alert-error {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--status-expired-border);
+  border-radius: 10px;
+  background: var(--status-expired-bg);
+  color: var(--status-expired-text);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.alert-warning {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--status-pending-border);
+  border-radius: 10px;
+  background: var(--status-pending-bg);
+  color: var(--status-pending-text);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+/* =====================================================================
+   JOB CARD HOVER ACCENT
+   ===================================================================== */
+
+.job-card {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-light);
+  margin: 0 -1.5rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  transition: background 0.12s ease;
+  position: relative;
+}
+.job-card:last-child {
+  border-bottom: none;
+}
+.job-card:hover {
+  background: #fafbff;
+}
+.job-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: transparent;
+  border-radius: 0 2px 2px 0;
+  transition: background 0.12s ease;
+}
+.job-card:hover::before {
+  background: var(--brand);
+}
+
+/* =====================================================================
+   HERO SECTION
+   ===================================================================== */
+
+.hero-section {
+  background: linear-gradient(135deg, #f8faff 0%, #faf5ff 50%, #f0fdfa 100%);
+  border-bottom: 1px solid var(--border);
+}
+
+/* =====================================================================
+   FILTER BAR
+   ===================================================================== */
+
+.filter-bar {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #ffffff;
+  overflow: visible;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+.filter-search-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 1.25rem;
+  background: var(--brand);
+  color: white;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: 0 10px 10px 0;
+  transition: background 0.15s ease;
+  cursor: pointer;
+  white-space: nowrap;
+  min-height: 48px;
+}
+.filter-search-btn:hover {
+  background: var(--brand-dark);
+}

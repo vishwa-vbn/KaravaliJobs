@@ -1,0 +1,4 @@
+// Route handlers go here only when a server-side secret is needed
+// (e.g., webhook receivers, server-side config/ads fetch)
+// See ARCHITECTURE.md §2 — keep client SDK calls in Server Components where possible
+export {};
