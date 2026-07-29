@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
 
     // ── 2. Batch-update status to 'expired' ───────────────────────────────────
     const batch = adminDb.batch();
-    expiredSnap.docs.forEach((docSnap) => {
+    expiredSnap.docs.forEach((docSnap: any) => {
       batch.update(docSnap.ref, { status: 'expired' });
     });
     await batch.commit();

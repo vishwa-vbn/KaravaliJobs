@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
           replyText = `🔥 <b>Latest Job Listings:</b>\n\n`;
           const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://karavali-jobs.com';
           
-          jobsSnap.docs.forEach((docSnap, index) => {
+          jobsSnap.docs.forEach((docSnap: any, index: number) => {
             const data = docSnap.data();
             replyText += `${index + 1}. <b>${esc(data.title)}</b>\n` +
                          `🏢 ${esc(data.companyName)} | 📍 ${esc(data.location)}\n` +
@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
 
           const normalizedQuery = queryStr.toLowerCase();
           const matches = jobsSnap.docs
-            .map(doc => ({ id: doc.id, ...doc.data() }))
+            .map((doc: any) => ({ id: doc.id, ...doc.data() }))
             .filter((job: any) => 
               job.title?.toLowerCase().includes(normalizedQuery) ||
               job.companyName?.toLowerCase().includes(normalizedQuery) ||

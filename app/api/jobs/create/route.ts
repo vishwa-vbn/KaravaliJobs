@@ -152,7 +152,7 @@ export async function POST(req: NextRequest) {
           .get();
 
         const emails = subscribersSnap.docs
-          .map((d) => d.data().email as string)
+          .map((d: any) => d.data().email as string)
           .filter(Boolean);
 
         if (emails.length > 0) {
