@@ -19,24 +19,32 @@ export default function SocialBarAd() {
   useEffect(() => {
     async function loadConfig() {
       const cfg = await fetchAdConfig();
+      console.log('[SocialBarAd] loaded config:', cfg);
       setAdConfig(cfg);
     }
     loadConfig();
   }, []);
 
   useEffect(() => {
+    console.log('[SocialBarAd] consent:', consent, 'config:', adConfig);
     if (!consent || !adConfig || !adConfig.networks) return;
 
     const adsterra = adConfig.networks.adsterra;
+    console.log('[SocialBarAd] Adsterra network details:', adsterra);
     if (!adsterra || !adsterra.enabled || !adsterra.socialBarUrl) return;
 
     const url = cleanUrl(adsterra.socialBarUrl);
+    console.log('[SocialBarAd] Cleaned URL for social bar:', url);
     if (!url) return;
 
     // Avoid injecting multiple times
     const existingScript = document.querySelector(`script[src="${url}"]`);
-    if (existingScript) return;
+    if (existingScript) {
+      console.log('[SocialBarAd] Script already exists in DOM:', url);
+      return;
+    }
 
+    console.log('[SocialBarAd] Injecting script tag for URL:', url);
     const script = document.createElement('script');
     script.type = 'text/javascript';
     script.src = url;
@@ -46,6 +54,7 @@ export default function SocialBarAd() {
 
     return () => {
       // Clean up script on unmount
+      console.log('[SocialBarAd] Unmounting and removing script:', url);
       script.remove();
     };
   }, [consent, adConfig]);
