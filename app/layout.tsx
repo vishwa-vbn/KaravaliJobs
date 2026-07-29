@@ -4,6 +4,7 @@ import './globals.css';
 import ReduxProvider from '@/components/providers/ReduxProvider';
 import AuthInit from '@/components/providers/AuthInit';
 import AdConsentBanner from '@/components/ads/AdConsentBanner';
+import SocialBarAd from '@/components/ads/SocialBarAd';
 import { UIProvider } from '@/components/ui/UIContext';
 
 const inter = Inter({
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <UIProvider>
               {/* AdConsentBanner renders null until Phase 3 — keeps this import ready */}
               <AdConsentBanner />
+              <SocialBarAd />
               {children}
             </UIProvider>
           </AuthInit>

@@ -22,6 +22,17 @@ export default function AdSlot({ slot }: AdSlotProps) {
     loadConfig();
   }, []);
 
+  const [width, setWidth] = useState<number>(768);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setWidth(window.innerWidth);
+      const handleResize = () => setWidth(window.innerWidth);
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }
+  }, []);
+
   useEffect(() => {
     if (!consent || !adConfig || !containerRef.current) return;
 
@@ -34,32 +45,70 @@ export default function AdSlot({ slot }: AdSlotProps) {
     containerRef.current.innerHTML = '';
 
     if (networkName === 'adsterra') {
-      const zoneId = details.zoneIds?.[slot] || '';
+      let zoneId = '';
+      let adWidth = 320;
+      let adHeight = 50;
+      let isNative = false;
+      let scriptDomain = 'www.highperformanceformat.com';
+
+      if (slot === 'header') {
+        const isMobile = width < 768;
+        zoneId = isMobile 
+          ? (details.headerMobileKey || details.zoneIds?.header || '')
+          : (details.headerDesktopKey || details.zoneIds?.header || '');
+        adWidth = isMobile ? 320 : 468;
+        adHeight = isMobile ? 50 : 60;
+      } else if (slot === 'native') {
+        zoneId = details.nativeKey || details.zoneIds?.native || '';
+        scriptDomain = details.nativeScriptDomain || 'pl30586630.effectivecpmnetwork.com';
+        isNative = true;
+      } else if (slot === 'sidebar') {
+        const useTall = width >= 768;
+        zoneId = useTall
+          ? (details.sidebarTallKey || details.sidebarShortKey || details.zoneIds?.sidebar || '')
+          : (details.sidebarShortKey || details.sidebarTallKey || details.zoneIds?.sidebar || '');
+        adWidth = 160;
+        adHeight = (details.sidebarShortKey && !details.sidebarTallKey) || (!useTall && details.sidebarShortKey) ? 300 : 600;
+      } else {
+        // Fallback / default
+        zoneId = details.zoneIds?.[slot] || '';
+      }
+
       if (!zoneId) return;
 
-      // Add wrapper div as expected by Adsterra script
-      const wrapperId = `container-${zoneId}`;
-      const wrapperDiv = document.createElement('div');
-      wrapperDiv.id = wrapperId;
-      containerRef.current.appendChild(wrapperDiv);
+      if (isNative) {
+        // Native ad format: div container-ID + script
+        const wrapperId = `container-${zoneId}`;
+        const wrapperDiv = document.createElement('div');
+        wrapperDiv.id = wrapperId;
+        containerRef.current.appendChild(wrapperDiv);
 
-      const configScript = document.createElement('script');
-      configScript.type = 'text/javascript';
-      configScript.innerHTML = `
-        atOptions = {
-          'key' : '${zoneId}',
-          'format' : 'iframe',
-          'height' : ${slot === 'header' ? 90 : slot === 'sidebar' ? 250 : 50},
-          'width' : ${slot === 'header' ? 728 : slot === 'sidebar' ? 300 : 320},
-          'params' : {}
-        };
-      `;
-      containerRef.current.appendChild(configScript);
+        const script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.async = true;
+        script.setAttribute('data-cfasync', 'false');
+        script.src = `https://${scriptDomain}/${zoneId}/invoke.js`;
+        containerRef.current.appendChild(script);
+      } else {
+        // Standard iframe banner format
+        const configScript = document.createElement('script');
+        configScript.type = 'text/javascript';
+        configScript.innerHTML = `
+          atOptions = {
+            'key' : '${zoneId}',
+            'format' : 'iframe',
+            'height' : ${adHeight},
+            'width' : ${adWidth},
+            'params' : {}
+          };
+        `;
+        containerRef.current.appendChild(configScript);
 
-      const script = document.createElement('script');
-      script.type = 'text/javascript';
-      script.src = `//www.highcreativegate.com/${zoneId}/invoke.js`;
-      containerRef.current.appendChild(script);
+        const script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = `https://${scriptDomain}/${zoneId}/invoke.js`;
+        containerRef.current.appendChild(script);
+      }
 
     } else if (networkName === 'propellerads') {
       const zoneId = details.zoneId || '';
@@ -71,7 +120,7 @@ export default function AdSlot({ slot }: AdSlotProps) {
       script.src = `//plp.propellerads.com/zone?id=${zoneId}`;
       containerRef.current.appendChild(script);
     }
-  }, [consent, adConfig, slot]);
+  }, [consent, adConfig, slot, width]);
 
   if (!consent) return null;
 

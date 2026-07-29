@@ -8,6 +8,15 @@ export interface AdNetworkConfig {
   siteId?: string;
   zoneId?: string;
   publisherId?: string;
+  
+  // Custom Adsterra Keys
+  headerDesktopKey?: string;      // 468x60
+  headerMobileKey?: string;       // 320x50
+  nativeKey?: string;             // Native banner code
+  nativeScriptDomain?: string;    // e.g., pl30586630.effectivecpmnetwork.com
+  sidebarTallKey?: string;        // 160x600
+  sidebarShortKey?: string;       // 160x300
+  socialBarUrl?: string;          // Global social bar script url
 }
 
 export interface AdConfig {
