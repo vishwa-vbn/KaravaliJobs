@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
             replyText = `🔍 <b>Search Results for "${esc(queryStr)}":</b>\n\n`;
             const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://karavali-jobs.com';
 
-            matches.forEach((job: any, index) => {
+            matches.forEach((job: any, index: number) => {
               replyText += `${index + 1}. <b>${esc(job.title)}</b>\n` +
                            `🏢 ${esc(job.companyName)} | 📍 ${esc(job.location)}\n` +
                            `👉 <a href="${siteUrl}/jobs/${job.id}">View Details</a>\n\n`;
