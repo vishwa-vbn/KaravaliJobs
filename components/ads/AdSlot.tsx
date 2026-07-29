@@ -5,6 +5,22 @@ import { useSelector } from 'react-redux';
 import type { RootState } from '@/lib/redux/store';
 import { fetchAdConfig, selectNetwork, type AdConfig } from '@/lib/ads';
 
+function cleanKey(val: string): string {
+  if (!val) return '';
+  const match = val.match(/[a-f0-9]{32}/i);
+  if (match) return match[0];
+  return val.trim();
+}
+
+function cleanDomain(val: string): string {
+  if (!val) return '';
+  const match = val.match(/src=["']https?:\/\/([^/]+)/i);
+  if (match) return match[1];
+  const urlMatch = val.match(/https?:\/\/([^/]+)/i);
+  if (urlMatch) return urlMatch[1];
+  return val.trim();
+}
+
 interface AdSlotProps {
   slot: 'header' | 'native' | 'sidebar' | 'footer-sticky';
 }
@@ -53,25 +69,25 @@ export default function AdSlot({ slot }: AdSlotProps) {
 
       if (slot === 'header') {
         const isMobile = width < 768;
-        zoneId = isMobile 
+        zoneId = cleanKey(isMobile 
           ? (details.headerMobileKey || details.zoneIds?.header || '')
-          : (details.headerDesktopKey || details.zoneIds?.header || '');
+          : (details.headerDesktopKey || details.zoneIds?.header || ''));
         adWidth = isMobile ? 320 : 468;
         adHeight = isMobile ? 50 : 60;
       } else if (slot === 'native') {
-        zoneId = details.nativeKey || details.zoneIds?.native || '';
-        scriptDomain = details.nativeScriptDomain || 'pl30586630.effectivecpmnetwork.com';
+        zoneId = cleanKey(details.nativeKey || details.zoneIds?.native || '');
+        scriptDomain = cleanDomain(details.nativeScriptDomain || 'pl30586630.effectivecpmnetwork.com');
         isNative = true;
       } else if (slot === 'sidebar') {
         const useTall = width >= 768;
-        zoneId = useTall
+        zoneId = cleanKey(useTall
           ? (details.sidebarTallKey || details.sidebarShortKey || details.zoneIds?.sidebar || '')
-          : (details.sidebarShortKey || details.sidebarTallKey || details.zoneIds?.sidebar || '');
+          : (details.sidebarShortKey || details.sidebarTallKey || details.zoneIds?.sidebar || ''));
         adWidth = 160;
         adHeight = (details.sidebarShortKey && !details.sidebarTallKey) || (!useTall && details.sidebarShortKey) ? 300 : 600;
       } else {
         // Fallback / default
-        zoneId = details.zoneIds?.[slot] || '';
+        zoneId = cleanKey(details.zoneIds?.[slot] || '');
       }
 
       if (!zoneId) return;
