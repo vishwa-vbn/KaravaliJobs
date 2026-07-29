@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { adminDb, adminAuth } from '@/lib/firebase/admin';
 import { sendNewJobAlert, sendAdminFlaggedNotice } from '@/lib/server/brevo';
 import { sendTelegramJobPost } from '@/lib/server/telegram';
-import { admin } from '@/lib/firebase/admin';
+import { admin, FieldValue } from '@/lib/firebase/admin';
 import { containsProfanity } from '@/lib/server/moderation';
 
 /**
@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
       providerId,
       status: jobStatus,
       featured: false,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      createdAt: FieldValue.serverTimestamp(),
       expiresAt,
       tags: tags || [],
     };
