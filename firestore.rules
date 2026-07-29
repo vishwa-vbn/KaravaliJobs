@@ -80,6 +80,12 @@ service cloud.firestore {
     match /channelsQueue/{docId} {
       allow read, write: if isSuperAdmin();
     }
+
+    // ─── config rules ────────────────────────────────────────────────────────
+    match /config/{configId} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
   }
 }
 
