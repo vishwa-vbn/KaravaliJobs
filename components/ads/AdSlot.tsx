@@ -92,59 +92,105 @@ export default function AdSlot({ slot }: AdSlotProps) {
 
       if (!zoneId) return;
 
-      if (isNative) {
-        // Native ad format: div container-ID + script
-        const wrapperId = `container-${zoneId}`;
-        const wrapperDiv = document.createElement('div');
-        wrapperDiv.id = wrapperId;
-        containerRef.current.appendChild(wrapperDiv);
+      // Create an iframe to isolate the script execution context and prevent atOptions collision
+      const iframe = document.createElement('iframe');
+      iframe.width = isNative ? '100%' : `${adWidth}`;
+      iframe.height = isNative ? '280' : `${adHeight}`;
+      iframe.style.border = 'none';
+      iframe.style.overflow = 'hidden';
+      iframe.style.display = 'block';
+      iframe.style.margin = '0 auto';
+      iframe.style.maxWidth = '100%';
 
-        const script = document.createElement('script');
-        script.type = 'text/javascript';
-        script.async = true;
-        script.setAttribute('data-cfasync', 'false');
-        script.src = `https://${scriptDomain}/${zoneId}/invoke.js`;
-        containerRef.current.appendChild(script);
-      } else {
-        // Standard iframe banner format
-        const configScript = document.createElement('script');
-        configScript.type = 'text/javascript';
-        configScript.innerHTML = `
-          atOptions = {
-            'key' : '${zoneId}',
-            'format' : 'iframe',
-            'height' : ${adHeight},
-            'width' : ${adWidth},
-            'params' : {}
-          };
-        `;
-        containerRef.current.appendChild(configScript);
+      iframe.srcdoc = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <style>
+              body {
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+                background: transparent;
+                ${!isNative ? `
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  height: 100vh;
+                ` : ''}
+              }
+              #container-${zoneId} {
+                width: 100%;
+              }
+            </style>
+          </head>
+          <body>
+            ${isNative ? `
+              <div id="container-${zoneId}"></div>
+              <script async="async" data-cfasync="false" src="https://${scriptDomain}/${zoneId}/invoke.js"></script>
+            ` : `
+              <script type="text/javascript">
+                var atOptions = {
+                  'key' : '${zoneId}',
+                  'format' : 'iframe',
+                  'height' : ${adHeight},
+                  'width' : ${adWidth},
+                  'params' : {}
+                };
+              </script>
+              <script type="text/javascript" src="https://${scriptDomain}/${zoneId}/invoke.js"></script>
+            `}
+          </body>
+        </html>
+      `;
 
-        const script = document.createElement('script');
-        script.type = 'text/javascript';
-        script.src = `https://${scriptDomain}/${zoneId}/invoke.js`;
-        containerRef.current.appendChild(script);
-      }
+      containerRef.current.appendChild(iframe);
 
     } else if (networkName === 'propellerads') {
       const zoneId = details.zoneId || '';
       if (!zoneId) return;
 
-      const script = document.createElement('script');
-      script.setAttribute('data-cfasync', 'false');
-      script.async = true;
-      script.src = `//plp.propellerads.com/zone?id=${zoneId}`;
-      containerRef.current.appendChild(script);
+      const iframe = document.createElement('iframe');
+      iframe.width = '100%';
+      iframe.height = '250';
+      iframe.style.border = 'none';
+      iframe.style.overflow = 'hidden';
+      iframe.style.display = 'block';
+
+      iframe.srcdoc = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <style>
+              body { margin: 0; padding: 0; overflow: hidden; background: transparent; }
+            </style>
+          </head>
+          <body>
+            <script data-cfasync="false" async src="//plp.propellerads.com/zone?id=${zoneId}"></script>
+          </body>
+        </html>
+      `;
+      containerRef.current.appendChild(iframe);
     }
   }, [consent, adConfig, slot, width]);
 
   if (!consent) return null;
 
   return (
-    <div className="flex justify-center my-4 overflow-hidden w-full">
-      <div ref={containerRef} className="ad-slot-container min-h-[50px] flex items-center justify-center bg-gray-50 border border-gray-100 rounded-lg text-xs text-gray-400 select-none" style={{ minWidth: '300px' }}>
-        Loading Advertisement...
+    <div className="flex flex-col items-center justify-center my-3 overflow-hidden w-full">
+      <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest mb-1 select-none">
+        Sponsored
+      </span>
+      <div 
+        ref={containerRef} 
+        className="ad-slot-container flex items-center justify-center bg-slate-50/30 border border-slate-100/50 rounded-lg text-[10px] text-slate-300 select-none" 
+        style={{ minWidth: '300px', minHeight: '50px' }}
+      >
+        Loading ad...
       </div>
     </div>
   );
 }
+

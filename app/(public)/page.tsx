@@ -171,7 +171,7 @@ export default function HomePage() {
                   {filteredJobs.map((job, index) => (
                     <div key={job.jobId}>
                       <JobCard job={job} />
-                      {index > 0 && index % 5 === 0 && (
+                      {index > 0 && index % 10 === 0 && (
                         <div className="py-3">
                           <AdSlot slot="native" />
                         </div>
