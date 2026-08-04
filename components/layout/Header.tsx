@@ -33,14 +33,12 @@ export default function Header() {
     <header className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
       <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 no-underline group">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-105"
-            style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)' }}>
-            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <span className="text-sm font-bold text-slate-900 tracking-tight">Karavali <span className="text-indigo-600">Jobs</span></span>
+        <Link href="/" className="flex items-center no-underline group">
+          <img
+            src="/logo.png"
+            alt="Karavali Jobs"
+            className="h-16 w-auto object-contain transition-transform group-hover:scale-105"
+          />
         </Link>
 
         {/* Nav */}
@@ -50,6 +48,12 @@ export default function Header() {
             className="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
           >
             Find Jobs
+          </Link>
+          <Link
+            href="/local-jobs"
+            className="px-3 py-1.5 text-xs font-semibold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+          >
+            Local Jobs
           </Link>
           <Link
             href="/alerts-signup"

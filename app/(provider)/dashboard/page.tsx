@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import { collection, query, where, orderBy, getDocs, limit, startAfter, getCountFromServer, type QueryDocumentSnapshot, type DocumentData } from 'firebase/firestore';
 import { db } from '@/lib/firebase/client';
 import { renewJob, deleteJob, type Job } from '@/lib/jobs/jobService';
+import { fetchLocalJobs, deleteLocalJob, type LocalJob } from '@/lib/jobs/localJobService';
 import type { RootState } from '@/lib/redux/store';
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
@@ -104,10 +105,29 @@ export default function DashboardPage() {
     }
   }
 
+  const [activeTab, setActiveTab] = useState<'online' | 'local'>('online');
+  const [localJobs, setLocalJobs] = useState<LocalJob[]>([]);
+  const [loadingLocal, setLoadingLocal] = useState(true);
+
+  async function loadLocalJobs() {
+    if (!user) return;
+    setLoadingLocal(true);
+    try {
+      const allLocal = await fetchLocalJobs();
+      const filtered = allLocal.filter((j: any) => j.providerId === user.uid);
+      setLocalJobs(filtered);
+    } catch (err) {
+      console.error('Failed to load local jobs:', err);
+    } finally {
+      setLoadingLocal(false);
+    }
+  }
+
   useEffect(() => {
     if (user) {
       loadStats();
       loadJobs(true);
+      loadLocalJobs();
     }
   }, [user]);
 
@@ -126,6 +146,24 @@ export default function DashboardPage() {
       } catch (err) {
         console.error('Failed to renew job:', err);
         toast('Failed to renew job listing.', 'error');
+      }
+    }
+  };
+
+  const handleDeleteLocalJob = async (id: string) => {
+    const ok = await confirm(
+      'Delete Local Listing',
+      'Are you sure you want to permanently delete this local job listing? This action cannot be undone.',
+      { confirmLabel: 'Delete Listing', type: 'danger' }
+    );
+    if (ok) {
+      try {
+        await deleteLocalJob(id);
+        toast('Local listing deleted successfully!', 'success');
+        await loadLocalJobs();
+      } catch (err) {
+        console.error('Failed to delete local job:', err);
+        toast('Failed to delete local job listing.', 'error');
       }
     }
   };
@@ -164,12 +202,20 @@ export default function DashboardPage() {
                 Manage your job listings
               </p>
             </div>
-            <Link href="/dashboard/new-job" className="btn-primary flex-shrink-0">
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-              </svg>
-              Post New Job
-            </Link>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Link href="/dashboard/new-local-job" className="px-4 py-2 border border-neutral-300 text-neutral-700 text-xs font-bold rounded-lg hover:bg-neutral-50 transition-colors flex items-center gap-1.5 flex-shrink-0">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                Post Local Job
+              </Link>
+              <Link href="/dashboard/new-job" className="btn-primary flex-shrink-0">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                Post New Job
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -192,79 +238,219 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Listings */}
-          {loading ? (
-            <div className="space-y-4">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="border-b border-neutral-100 py-5 animate-pulse">
-                  <div className="h-4 bg-neutral-100 rounded w-1/3 mb-2" />
-                  <div className="h-3 bg-neutral-100 rounded w-1/4" />
-                </div>
-              ))}
-            </div>
-          ) : jobs.length > 0 ? (
-            <div>
-              {/* Table header */}
-              <div className="grid grid-cols-12 gap-4 py-2 border-b border-neutral-200 mb-1">
-                <div className="col-span-4 text-label text-neutral-400">Job</div>
-                <div className="col-span-2 text-label text-neutral-400">Status</div>
-                <div className="col-span-2 text-label text-neutral-400">Expires</div>
-                <div className="col-span-4 text-label text-neutral-400 text-right">Actions</div>
+          {/* Tab Selector */}
+          <div className="flex border-b border-neutral-200 gap-6 text-sm font-semibold pb-2.5">
+            <button
+              onClick={() => setActiveTab('online')}
+              className={`pb-1 select-none cursor-pointer border-b-2 transition-colors ${
+                activeTab === 'online'
+                  ? 'border-black text-black'
+                  : 'border-transparent text-neutral-400 hover:text-neutral-600'
+              }`}
+            >
+              Online Listings ({jobs.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('local')}
+              className={`pb-1 select-none cursor-pointer border-b-2 transition-colors ${
+                activeTab === 'local'
+                  ? 'border-black text-black'
+                  : 'border-transparent text-neutral-400 hover:text-neutral-600'
+              }`}
+            >
+              Local Newspaper Listings ({localJobs.length})
+            </button>
+          </div>
+
+          {activeTab === 'online' ? (
+            /* Listings (Online) */
+            loading ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="border-b border-neutral-100 py-5 animate-pulse">
+                    <div className="h-4 bg-neutral-100 rounded w-1/3 mb-2" />
+                    <div className="h-3 bg-neutral-100 rounded w-1/4" />
+                  </div>
+                ))}
               </div>
+            ) : jobs.length > 0 ? (
+              <div>
+                {/* Table header */}
+                <div className="grid grid-cols-12 gap-4 py-2 border-b border-neutral-200 mb-1">
+                  <div className="col-span-4 text-label text-neutral-400">Job</div>
+                  <div className="col-span-2 text-label text-neutral-400">Status</div>
+                  <div className="col-span-2 text-label text-neutral-400">Expires</div>
+                  <div className="col-span-4 text-label text-neutral-400 text-right">Actions</div>
+                </div>
 
-              {jobs.map((job) => {
-                const daysLeft = job.expiresAt
-                  ? Math.max(0, Math.ceil(
-                      (new Date(job.expiresAt.seconds ? job.expiresAt.seconds * 1000 : job.expiresAt).getTime() - Date.now())
-                      / (1000 * 60 * 60 * 24)
-                    ))
-                  : 0;
-                const isExpired = daysLeft === 0;
+                {jobs.map((job) => {
+                  const daysLeft = job.expiresAt
+                    ? Math.max(0, Math.ceil(
+                        (new Date(job.expiresAt.seconds ? job.expiresAt.seconds * 1000 : job.expiresAt).getTime() - Date.now())
+                        / (1000 * 60 * 60 * 24)
+                      ))
+                    : 0;
+                  const isExpired = daysLeft === 0;
 
-                return (
+                  return (
+                    <div
+                      key={job.jobId}
+                      className="grid grid-cols-12 gap-4 py-4 border-b border-neutral-100 items-center hover:bg-neutral-50 -mx-2 px-2 rounded transition-colors"
+                    >
+                      {/* Job info */}
+                      <div className="col-span-4">
+                        <Link
+                          href={`/jobs/${job.jobId}`}
+                          className="text-sm font-semibold text-black hover:underline underline-offset-2 block truncate"
+                        >
+                          {job.title}
+                        </Link>
+                        <p className="text-xs text-neutral-500 mt-0.5 truncate">
+                          {job.companyName} · {job.location}
+                          {job.category && ` · ${job.category}`}
+                        </p>
+                      </div>
+
+                      {/* Status */}
+                      <div className="col-span-2">
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide ${
+                          job.status === 'active'
+                            ? 'text-emerald-700 bg-emerald-50 border border-emerald-200'
+                            : 'text-neutral-500 bg-neutral-100 border border-neutral-200'
+                        }`}>
+                          {job.status === 'active' && (
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+                          )}
+                          {job.status}
+                        </span>
+                      </div>
+
+                      {/* Expires */}
+                      <div className="col-span-2">
+                        <span className={`text-xs font-medium ${isExpired ? 'text-red-500' : 'text-neutral-500'}`}>
+                          {isExpired ? 'Expired' : `${daysLeft}d left`}
+                        </span>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="col-span-4 flex items-center justify-end gap-4 flex-wrap">
+                        <Link
+                          href={`/jobs/${job.jobId}`}
+                          className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-black transition-colors font-medium"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                          View
+                        </Link>
+                        <Link
+                          href={`/dashboard/edit-job/${job.jobId}`}
+                          className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-black transition-colors font-medium"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                          </svg>
+                          Edit
+                        </Link>
+                        <button
+                          onClick={() => handleRenew(job.jobId)}
+                          className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-black transition-colors font-medium cursor-pointer"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                          </svg>
+                          Renew
+                        </button>
+                        <button
+                          onClick={() => handleDelete(job.jobId)}
+                          className="inline-flex items-center gap-1 text-xs text-neutral-400 hover:text-red-600 transition-colors font-medium cursor-pointer"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142M5 7h16" />
+                          </svg>
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* Load More Button */}
+                {hasMore && (
+                  <div className="text-center pt-6">
+                    <button
+                      onClick={() => loadJobs(false)}
+                      disabled={loadingMore}
+                      className="btn-secondary text-xs"
+                    >
+                      {loadingMore ? 'Loading next page...' : 'Load More Listings'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="py-20 text-center">
+                <div className="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <h2 className="text-sm font-semibold text-neutral-600 mb-1">No job listings yet</h2>
+                <p className="text-xs text-neutral-400 mb-5">
+                  Post your first job listing to reach candidates in Udupi & Mangalore.
+                </p>
+                <Link href="/dashboard/new-job" className="btn-primary">
+                  Post Your First Job
+                </Link>
+              </div>
+            )
+          ) : (
+            /* Listings (Local) */
+            loadingLocal ? (
+              <div className="space-y-4">
+                {[1, 2].map((i) => (
+                  <div key={i} className="border-b border-neutral-100 py-5 animate-pulse">
+                    <div className="h-4 bg-neutral-100 rounded w-1/3 mb-2" />
+                    <div className="h-3 bg-neutral-100 rounded w-1/4" />
+                  </div>
+                ))}
+              </div>
+            ) : localJobs.length > 0 ? (
+              <div>
+                {/* Table header */}
+                <div className="grid grid-cols-12 gap-4 py-2 border-b border-neutral-200 mb-1">
+                  <div className="col-span-4 text-label text-neutral-400">Job Title</div>
+                  <div className="col-span-2 text-label text-neutral-400">Location</div>
+                  <div className="col-span-3 text-label text-neutral-400">Listing Date</div>
+                  <div className="col-span-3 text-label text-neutral-400 text-right">Actions</div>
+                </div>
+
+                {localJobs.map((job) => (
                   <div
-                    key={job.jobId}
+                    key={job.id}
                     className="grid grid-cols-12 gap-4 py-4 border-b border-neutral-100 items-center hover:bg-neutral-50 -mx-2 px-2 rounded transition-colors"
                   >
-                    {/* Job info */}
                     <div className="col-span-4">
-                      <Link
-                        href={`/jobs/${job.jobId}`}
-                        className="text-sm font-semibold text-black hover:underline underline-offset-2 block truncate"
-                      >
+                      <span className="text-sm font-semibold text-black block truncate">
                         {job.title}
-                      </Link>
+                      </span>
                       <p className="text-xs text-neutral-500 mt-0.5 truncate">
-                        {job.companyName} · {job.location}
-                        {job.category && ` · ${job.category}`}
+                        {job.companyName}
                       </p>
                     </div>
 
-                    {/* Status */}
-                    <div className="col-span-2">
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide ${
-                        job.status === 'active'
-                          ? 'text-emerald-700 bg-emerald-50 border border-emerald-200'
-                          : 'text-neutral-500 bg-neutral-100 border border-neutral-200'
-                      }`}>
-                        {job.status === 'active' && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
-                        )}
-                        {job.status}
-                      </span>
+                    <div className="col-span-2 text-xs font-semibold text-neutral-600">
+                      {job.location}
                     </div>
 
-                    {/* Expires */}
-                    <div className="col-span-2">
-                      <span className={`text-xs font-medium ${isExpired ? 'text-red-500' : 'text-neutral-500'}`}>
-                        {isExpired ? 'Expired' : `${daysLeft}d left`}
-                      </span>
+                    <div className="col-span-3 text-xs text-neutral-500 font-medium">
+                      {job.dateString}
                     </div>
 
-                    {/* Actions */}
-                    <div className="col-span-4 flex items-center justify-end gap-4 flex-wrap">
+                    <div className="col-span-3 flex items-center justify-end gap-4">
                       <Link
-                        href={`/jobs/${job.jobId}`}
+                        href={`/local-jobs`}
                         className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-black transition-colors font-medium"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -273,26 +459,8 @@ export default function DashboardPage() {
                         </svg>
                         View
                       </Link>
-                      <Link
-                        href={`/dashboard/edit-job/${job.jobId}`}
-                        className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-black transition-colors font-medium"
-                      >
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                        </svg>
-                        Edit
-                      </Link>
                       <button
-                        onClick={() => handleRenew(job.jobId)}
-                        className="inline-flex items-center gap-1 text-xs text-neutral-500 hover:text-black transition-colors font-medium cursor-pointer"
-                      >
-                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-                        </svg>
-                        Renew
-                      </button>
-                      <button
-                        onClick={() => handleDelete(job.jobId)}
+                        onClick={() => handleDeleteLocalJob(job.id)}
                         className="inline-flex items-center gap-1 text-xs text-neutral-400 hover:text-red-600 transition-colors font-medium cursor-pointer"
                       >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -302,37 +470,24 @@ export default function DashboardPage() {
                       </button>
                     </div>
                   </div>
-                );
-              })}
-
-              {/* Load More Button */}
-              {hasMore && (
-                <div className="text-center pt-6">
-                  <button
-                    onClick={() => loadJobs(false)}
-                    disabled={loadingMore}
-                    className="btn-secondary text-xs"
-                  >
-                    {loadingMore ? 'Loading next page...' : 'Load More Listings'}
-                  </button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="py-20 text-center">
-              <div className="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center mx-auto mb-4">
-                <svg className="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
+                ))}
               </div>
-              <h2 className="text-sm font-semibold text-neutral-600 mb-1">No job listings yet</h2>
-              <p className="text-xs text-neutral-400 mb-5">
-                Post your first job listing to reach candidates in Udupi & Mangalore.
-              </p>
-              <Link href="/dashboard/new-job" className="btn-primary">
-                Post Your First Job
-              </Link>
-            </div>
+            ) : (
+              <div className="py-20 text-center">
+                <div className="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <h2 className="text-sm font-semibold text-neutral-600 mb-1">No local job listings yet</h2>
+                <p className="text-xs text-neutral-400 mb-5">
+                  Post a local classified listing to reach local candidates.
+                </p>
+                <Link href="/dashboard/new-local-job" className="btn-primary">
+                  Post Your First Local Job
+                </Link>
+              </div>
+            )
           )}
         </div>
       </main>
