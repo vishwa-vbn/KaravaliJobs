@@ -57,10 +57,10 @@ export default function LocalJobsPublicPage() {
         {/* Page Hero Header */}
         <div className="text-center max-w-2xl mx-auto mb-8">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 uppercase tracking-widest mb-3 border border-indigo-100/60">
-            📰 Newspaper Classifieds
+            📰 Newspaper Jobs
           </span>
           <h1 className="text-3xl font-black text-slate-900 tracking-tight leading-tight">
-            Local Classified Jobs
+            Local Jobs
           </h1>
           <p className="text-sm text-slate-500 mt-2 leading-relaxed">
             Daily listings extracted from local print newspapers like Udayavani, Vijaya Karnataka and others. Updated daily, no signup required.
