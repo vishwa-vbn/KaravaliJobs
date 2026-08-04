@@ -7,6 +7,8 @@ import AdConsentBanner from '@/components/ads/AdConsentBanner';
 import SocialBarAd from '@/components/ads/SocialBarAd';
 import { UIProvider } from '@/components/ui/UIContext';
 
+import AdBlockDetector from '@/components/ads/AdBlockDetector';
+
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
@@ -43,9 +45,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ReduxProvider>
           <AuthInit>
             <UIProvider>
-              {/* AdConsentBanner renders null until Phase 3 — keeps this import ready */}
               <AdConsentBanner />
               <SocialBarAd />
+              <AdBlockDetector />
               {children}
             </UIProvider>
           </AuthInit>
