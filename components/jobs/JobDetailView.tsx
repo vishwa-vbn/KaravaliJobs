@@ -387,7 +387,7 @@ export default function JobDetailView({ job }: JobDetailViewProps) {
         {/* Sidebar */}
         <div className="lg:w-72 flex-shrink-0 space-y-4 lg:sticky lg:top-20">
           {/* Ad */}
-          <div className="panel-sponsored">
+          <div className="panel-sponsored hidden lg:block">
             <p className="text-label text-slate-400 mb-3">Sponsored</p>
             <AdSlot slot="sidebar" />
           </div>
