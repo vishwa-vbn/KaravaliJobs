@@ -6,8 +6,10 @@ export default function AdBlockDetector() {
   const [isAdBlockerActive, setIsAdBlockerActive] = useState(false);
   const [checking, setChecking] = useState(true);
 
-  const checkAdBlocker = async () => {
-    setChecking(true);
+  const checkAdBlocker = async (isSilent = false) => {
+    if (!isSilent) {
+      setChecking(true);
+    }
     let isBlocked = false;
 
     // Method 1: Check by inserting a bait element matching typical ad blocker filters
@@ -40,7 +42,7 @@ export default function AdBlockDetector() {
     // Method 2: Attempt to fetch a script from a common ad server (e.g. Google Adsense)
     if (!isBlocked) {
       try {
-        const response = await fetch(
+        await fetch(
           new Request(
             'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
             { method: 'HEAD', mode: 'no-cors' }
@@ -58,12 +60,12 @@ export default function AdBlockDetector() {
   };
 
   useEffect(() => {
-    // Run detection after component mounts
-    checkAdBlocker();
+    // Run initial check (non-silent)
+    checkAdBlocker(false);
 
-    // Automatically check every 3 seconds to see if the ad blocker has been disabled
+    // Automatically check every 3 seconds silently in the background
     const interval = setInterval(() => {
-      checkAdBlocker();
+      checkAdBlocker(true);
     }, 3000);
 
     return () => clearInterval(interval);
@@ -102,7 +104,7 @@ export default function AdBlockDetector() {
 
         <div className="w-full">
           <button
-            onClick={checkAdBlocker}
+            onClick={() => checkAdBlocker(false)}
             className="w-full px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-md hover:shadow-indigo-200/50 cursor-pointer"
           >
             I've Disabled It
