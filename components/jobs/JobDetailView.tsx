@@ -377,6 +377,11 @@ export default function JobDetailView({ job }: JobDetailViewProps) {
               </p>
             </div>
           )}
+
+          {/* Ad banner below How to Apply */}
+          <div className="mt-6">
+            <AdSlot slot="native" />
+          </div>
         </div>
 
         {/* Sidebar */}
