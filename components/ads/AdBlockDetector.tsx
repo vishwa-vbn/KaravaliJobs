@@ -60,6 +60,13 @@ export default function AdBlockDetector() {
   useEffect(() => {
     // Run detection after component mounts
     checkAdBlocker();
+
+    // Automatically check every 3 seconds to see if the ad blocker has been disabled
+    const interval = setInterval(() => {
+      checkAdBlocker();
+    }, 3000);
+
+    return () => clearInterval(interval);
   }, []);
 
   if (checking) return null;
@@ -93,19 +100,12 @@ export default function AdBlockDetector() {
           We keep <strong>Karavali Jobs</strong> 100% free for job seekers and local businesses by showing non-intrusive display ads. Please support us by disabling your ad blocker on this website.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="w-full">
           <button
             onClick={checkAdBlocker}
-            className="flex-1 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-md hover:shadow-indigo-200/50 cursor-pointer"
+            className="w-full px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-md hover:shadow-indigo-200/50 cursor-pointer"
           >
             I've Disabled It
-          </button>
-          
-          <button
-            onClick={() => setIsAdBlockerActive(false)}
-            className="flex-1 px-4 py-3 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl text-xs font-semibold transition-all border border-slate-200/60 cursor-pointer"
-          >
-            Continue Anyway
           </button>
         </div>
       </div>
